@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOP Compras · ERPNext</title>
+<style>
+  :root {
+    --galaxy: #081F5C;
+    --planetary: #334EAC;
+    --universe: #7096D1;
+    --venus: #BAD6EB;
+    --ok: #1f7a45;
+    --bad: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f4f6fa;
+    color: #1d2433;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 28px 24px 64px; }
+  header {
+    background: #fff;
+    border-left: 6px solid var(--planetary);
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 1px 3px rgba(8,31,92,.06);
+  }
+  header .brand {
+    color: var(--universe);
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  header h1 {
+    margin: 6px 0 4px;
+    color: var(--galaxy);
+    font-size: 26px;
+  }
+  header .meta { color: #55607a; font-size: 13px; }
+  nav.toc {
+    background: #fff;
+    border: 2px solid var(--galaxy);
+    border-radius: 12px;
+    padding: 18px 20px 20px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 14px rgba(8,31,92,.08);
+  }
+  nav.toc h2 {
+    margin: 0 0 14px;
+    font-size: 18px;
+    color: var(--galaxy);
+    letter-spacing: .02em;
+  }
+  nav.toc ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  nav.toc li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--galaxy);
+    font-weight: 650;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #d9e2ef;
+    background: #f8fafc;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  nav.toc li a:hover {
+    background: #fff;
+    border-color: var(--planetary);
+    transform: translateX(2px);
+  }
+  nav.toc .toc-num {
+    flex: 0 0 auto;
+    min-width: 52px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: #fff;
+  }
+  nav.toc .toc-label { flex: 1; line-height: 1.35; }
+  .sop {
+    background: #fff;
+    border: 1px solid #e2e8f2;
+    border-radius: 12px;
+    padding: 22px 24px 28px;
+    margin-bottom: 36px;
+    box-shadow: 0 2px 10px rgba(8,31,92,.06);
+    overflow: hidden;
+    border-top: 6px solid var(--planetary);
+  }
+  .sop-head {
+    margin: -22px -24px 18px;
+    padding: 18px 24px 16px;
+    background: linear-gradient(180deg, #f0f4fb 0%, #fff 85%);
+    border-bottom: 1px solid #e2e8f2;
+  }
+  .sop > h2,
+  .sop-head > h2 {
+    margin: 0;
+    color: var(--galaxy);
+    font-size: 24px;
+    line-height: 1.25;
+    border: none;
+    padding: 0;
+  }
+  .badge {
+    display: inline-block;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: var(--planetary);
+  }
+  /* Colores distintos por SOP */
+  #sop-00 { border-top-color: #55607a; }
+  #sop-00 .badge, #toc-00 .toc-num { background: #55607a; }
+  #sop-crear { border-top-color: #0f766e; }
+  #sop-crear .badge, #toc-crear .toc-num { background: #0f766e; }
+  #sop-01 { border-top-color: #1d4ed8; }
+  #sop-01 .badge, #toc-01 .toc-num { background: #1d4ed8; }
+  #sop-02 { border-top-color: #7c3aed; }
+  #sop-02 .badge, #toc-02 .toc-num { background: #7c3aed; }
+  #sop-03 { border-top-color: #b45309; }
+  #sop-03 .badge, #toc-03 .toc-num { background: #b45309; }
+  #sop-04 { border-top-color: #047857; }
+  #sop-04 .badge, #toc-04 .toc-num { background: #047857; }
+  #sop-05 { border-top-color: #be123c; }
+  #sop-05 .badge, #toc-05 .toc-num { background: #be123c; }
+  h3 {
+    margin: 18px 0 8px;
+    color: var(--planetary);
+    font-size: 15px;
+  }
+  .idea, .tip, .warn, .check {
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 10px 0 14px;
+  }
+  .idea {
+    border: 1px solid var(--venus);
+    border-left: 4px solid var(--planetary);
+    background: #fafcff;
+  }
+  .tip {
+    border: 1px solid #c8e6d0;
+    border-left: 4px solid var(--ok);
+    background: #f6fbf7;
+  }
+  .warn {
+    border: 1px solid #f0c2c2;
+    border-left: 4px solid var(--bad);
+    background: #fff8f8;
+  }
+  .check {
+    border: 1px solid #d5dde8;
+    border-left: 4px solid #55607a;
+    background: #f8f9fb;
+  }
+  .idea > strong:first-child,
+  .tip > strong:first-child,
+  .warn > strong:first-child,
+  .check > strong:first-child {
+    display: block;
+    margin-bottom: 4px;
+  }
+  ol.pasos {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    counter-reset: paso;
+  }
+  ol.pasos > li {
+    counter-increment: paso;
+    position: relative;
+    padding: 12px 12px 12px 52px;
+    margin: 0 0 10px;
+    background: #f8fafc;
+    border: 1px solid #e8eef6;
+    border-radius: 8px;
+  }
+  ol.pasos > li::before {
+    content: counter(paso);
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--planetary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  ol.pasos > li .titulo {
+    font-weight: 700;
+    color: var(--galaxy);
+    display: block;
+    margin-bottom: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0 14px;
+  }
+  th, td {
+    border: 1px solid #d9e2ef;
+    padding: 7px 9px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #eef3fb; color: var(--galaxy); }
+  figure.foto {
+    margin: 10px 0 4px;
+    padding: 0;
+  }
+  .foto-slot {
+    border: 2px dashed #9db4d8;
+    background: #f0f5fc;
+    color: #4a5f82;
+    border-radius: 8px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    font-size: 13px;
+  }
+  .foto-slot img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+    cursor: zoom-in;
+  }
+  .foto-slot img:hover {
+    outline: 2px solid var(--planetary);
+    outline-offset: 2px;
+  }
+  figcaption {
+    font-size: 12px;
+    color: #55607a;
+    margin-top: 4px;
+  }
+  figcaption::after {
+    content: " · clic en la imagen para ampliar";
+    color: #8a96ab;
+  }
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(8, 31, 92, 0.88);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    cursor: zoom-out;
+  }
+  #lightbox.open {
+    display: flex;
+  }
+  #lightbox img {
+    max-width: min(96vw, 1400px);
+    max-height: 92vh;
+    width: auto;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.45);
+    background: #fff;
+  }
+  #lightbox .lb-hint {
+    position: absolute;
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #c5d4ef;
+    font-size: 13px;
+  }
+  .howto-foto {
+    font-size: 12px;
+    color: #55607a;
+    margin-top: 4px;
+  }
+  footer {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #55607a;
+    text-align: center;
+  }
+  @media print {
+    body { background: #fff; font-size: 11.5px; }
+    .page { padding: 0; max-width: none; }
+    .sop { break-inside: avoid; box-shadow: none; }
+    nav.toc { break-after: page; }
+    .foto-slot { min-height: 90px; }
+    #lightbox, figcaption::after { display: none !important; }
+    nav.toc li a { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="brand">Nuovocell · ERPNext v16 · Live</div>
+  <h1>SOP — Equipo de compras</h1>
+  <div class="meta">
+    Guía de procedimientos · ERPNext · <a href="https://erp.nuovocell.com.ve">erp.nuovocell.com.ve</a><br>
+    Para el equipo de compras y ventas a sedes (Base Central y Compuclick)
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Guía rápida — elige el procedimiento</h2>
+  <ol>
+    <li id="toc-00"><a href="#sop-00"><span class="toc-num">SOP-00</span><span class="toc-label">Antes de empezar (siempre)</span></a></li>
+    <li id="toc-crear"><a href="#sop-crear"><span class="toc-num">Crear</span><span class="toc-label">Crear un artículo (Producto)</span></a></li>
+    <li id="toc-01"><a href="#sop-01"><span class="toc-num">SOP-01</span><span class="toc-label">Hacer una compra (Factura de compra)</span></a></li>
+    <li id="toc-02"><a href="#sop-02"><span class="toc-num">SOP-02</span><span class="toc-label">Hacer una venta a una sede (+ intercompany)</span></a></li>
+    <li id="toc-03"><a href="#sop-03"><span class="toc-num">SOP-03</span><span class="toc-label">Revisar mis facturas (estado, sede, pendiente)</span></a></li>
+    <li id="toc-04"><a href="#sop-04"><span class="toc-num">SOP-04</span><span class="toc-label">Revisar inventario y buscar IMEI / seriales</span></a></li>
+    <li id="toc-05"><a href="#sop-05"><span class="toc-num">SOP-05</span><span class="toc-label">Devolución a proveedor (y verificar inventario)</span></a></li>
+  </ol>
+</nav>
+
+<!-- ========== SOP 00 ========== -->
+<section class="sop" id="sop-00">
+  <div class="sop-head">
+    <span class="badge">SOP-00 · Base</span>
+    <h2>Antes de empezar (siempre)</h2>
+  </div>
+
+  <div class="idea">
+    <strong>Idea en una frase</strong>
+    ERPNext es un cuaderno compartido: cada compra o venta queda con fecha, usuario y almacén. Borrador aún no cuenta; <em>Enviado</em> ya movió stock y dinero.
+  </div>
+
+  <h3>Pasos</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Abre Chrome e inicia sesión</span>
+      Entra a <strong>https://erp.nuovocell.com.ve</strong> con tu usuario.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/00-login.png" alt="Pantalla de login erp.nuovocell.com.ve"></div>
+        <figcaption>Fig. 0.1 — Login</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Elige la compañía correcta</span>
+      En la factura (campo <strong>Compañía</strong>) debe quedar:
+      <ul>
+        <li>Compras / ventas de <strong>Compuclick</strong> → <strong>COMPUCLICK</strong></li>
+        <li>Compras / ventas de <strong>Base Central</strong> → <strong>BASE CENTRAL</strong></li>
+      </ul>
+      <div class="warn">
+        <strong>Error frecuente</strong>
+        Dejar <strong>NUOVOCELL</strong> y creer que estás comprando para Compuclick o Base Central (cámbiala antes de cargar productos).
+      </div>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/00-selector-compania.png" alt="Campo Compañía en Factura de compra — no dejar NUOVOCELL"></div>
+        <figcaption>Fig. 0.2 — Campo Compañía (cámbiala a BASE CENTRAL o COMPUCLICK)</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Usa el nombre completo del almacén (el que termina en - BC, - CC o - NC)</span>
+      Ejemplos correctos: <code>Base - BC</code>, <code>Disponible para Venta - CC</code>, <code>DISPONIBLE - BARUTA - NC</code>.<br>
+      No elijas solo el nombre de la sede o carpeta (ej. <code>BARUTA - NC</code> sin la palabra DISPONIBLE).
+    </li>
+  </ol>
+</section>
+
+<!-- ========== SOP CREAR ARTÍCULO ========== -->
+<section class="sop" id="sop-crear">
+  <div class="sop-head">
+    <span class="badge">Crear artículo</span>
+    <h2>Crear un artículo (Producto)</h2>
+  </div>
+
+  <div class="idea">
+    <strong>Para qué sirve</strong>
+    Antes de comprar o vender algo en ERPNext, ese producto tiene que existir en el sistema.
+    Aquí creas el producto (nombre, grupo y si lleva IMEI). Es como darlo de alta en el catálogo de Profit.
+    Docs: <a href="https://docs.frappe.io/erpnext/item">Item</a>
+  </div>
+
+  <div class="warn">
+    <strong>Importante (caso real)</strong>
+    La casilla Posee número de serie no se puede cambiar después de que el artículo ya tuvo movimientos de stock. Si se te olvidó marcarla, hay que crear un artículo nuevo y pasar la existencia con Reempaque. Revisa la casilla antes de Guardar.
+  </div>
+
+  <h3>Pasos</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Entra al módulo Almacén</span>
+      En el menú principal (o con Ctrl+K) abre el módulo <strong>Almacén</strong>.
+      Verás el tablero de inventario (gráficos, valor de stock, etc.).
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/C0-modulo-almacen-producto.png" alt="Módulo Almacén — clic en Producto"></div>
+        <figcaption>Fig. C.1 — Módulo Almacén · haz clic en Producto</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Abre Producto</span>
+      En la sección <strong>Maestros de informes</strong> (o el listado de opciones del módulo),
+      haz clic en <strong>Producto</strong>. Se abre la lista de todos los productos.
+    </li>
+    <li>
+      <span class="titulo">Pulsa + Agregar Producto</span>
+      Arriba a la derecha de la lista, pulsa <strong>+ Agregar Producto</strong>.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/C1-lista-agregar-producto.png" alt="Lista Producto y botón + Agregar Producto"></div>
+        <figcaption>Fig. C.2 — Lista Producto · + Agregar Producto</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Llena los datos básicos</span>
+      <table>
+        <tr><th>Campo</th><th>Qué hacer</th></tr>
+        <tr><td>Secuencia / código</td><td>Ya viene elegido por el sistema (ej. <code>ITEM-.#####</code>). <strong>No lo cambies.</strong></td></tr>
+        <tr><td>Nombre del producto</td><td>Escríbelo claro (como lo buscan en almacén).</td></tr>
+        <tr><td>Grupo de productos</td><td>Elige el grupo que corresponda (teléfonos, forros, etc.).</td></tr>
+        <tr><td>UdM predeterminada</td><td>Ya viene en <code>Unidad</code> por default. <strong>No la quites ni la cambies.</strong></td></tr>
+        <tr><td>Mantener stock</td><td>Ya viene marcada por default. <strong>No la desmarques</strong> (es mercancía física).</td></tr>
+      </table>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/C2-datos-basicos.png" alt="Ficha Producto: nombre, grupo, UdM Unidad, Mantener stock"></div>
+        <figcaption>Fig. C.3 — Datos básicos (deja los default como están)</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">¿Lleva IMEI / número de serie?</span>
+      En la sección <strong>Números de serie / Lotes</strong>:
+      <table>
+        <tr><th>Tipo de producto</th><th>Posee número de serie</th></tr>
+        <tr><td>Teléfonos, laptops, tablets, EcoFlow, SIM</td><td>✅ Márcala <em>antes</em> de Guardar</td></tr>
+        <tr><td>Accesorios (forros, cargadores, mouse, vidrios…)</td><td>❌ Déjala sin marcar</td></tr>
+      </table>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/C3-posee-serial.png" alt="Casilla Posee número de serie marcada"></div>
+        <figcaption>Fig. C.4 — Posee número de serie</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Permitir compras y ventas</span>
+      Deja marcados <strong>Permitir ventas</strong> y <strong>Permitir compra</strong> (salvo que te indiquen lo contrario).
+    </li>
+    <li>
+      <span class="titulo">Guardar</span>
+      Pulsa <strong>Guardar</strong>. Ya puedes usar este producto en una Factura de compra.
+    </li>
+  </ol>
+
+  <div class="check">
+    <strong>Cómo sé que quedó bien</strong>
+    El producto aparece en la lista; al buscarlo en una factura de compra sale el código; si es teléfono/laptop, la casilla de serial está ✅.
+  </div>
+</section>
+
+<!-- ========== SOP 01 ========== -->
+<section class="sop" id="sop-01">
+  <div class="sop-head">
+    <span class="badge">SOP-01 · Compra</span>
+    <h2>Hacer una compra (Factura de compra)</h2>
+  </div>
+
+  <div class="idea">
+    <strong>Qué es</strong>
+    Un solo documento hace dos cosas: <strong>sube el inventario</strong> al almacén que elijas y deja la <strong>deuda con el proveedor</strong> (después la registra el área de CxP / pagos).<br>
+    <strong>Analogía Profit:</strong> cargar la compra y que el stock suba en el almacén elegido.<br>
+    Docs: <a href="https://docs.frappe.io/erpnext/purchase-invoice">Purchase Invoice</a>
+  </div>
+
+  <h3>Cuándo usar esto</h3>
+  <ul>
+    <li>Llegó (o pagaste) mercancía de un proveedor y hay que registrarla en ERPNext.</li>
+    <li>Compra <strong>directa</strong>: no hace falta Orden de compra (PO).</li>
+  </ul>
+
+  <h3>Pasos (sin serial / accesorios)</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Abre Factura de compra → Agregar Factura de Compra</span>
+      Barra de búsqueda (Ctrl+K) → escribe <strong>Factura de compra</strong> → en la lista pulsa el botón
+      <strong>+ Agregar Factura de Compra</strong> (arriba a la derecha).
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/01-crear-nueva-factura.png" alt="Lista Factura de compra y botón + Agregar Factura de Compra"></div>
+        <figcaption>Fig. 1.1 — Botón + Agregar Factura de Compra</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Llena la cabecera</span>
+      <table>
+        <tr><th>Campo</th><th>Qué poner</th></tr>
+        <tr><td>Compañía</td><td>COMPUCLICK o BASE CENTRAL (la que estés usando)</td></tr>
+        <tr><td>Proveedor</td><td>El proveedor de la factura física</td></tr>
+        <tr><td>Fecha de contabilización</td><td>Día en que llegó / debe contar el stock</td></tr>
+        <tr><td>Factura de proveedor No.</td><td>Número de la factura del proveedor (para buscarla después)</td></tr>
+      </table>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/01-cabecera.png" alt="Cabecera: Proveedor, Compañía BASE CENTRAL, Factura de proveedor No."></div>
+        <figcaption>Fig. 1.2 — Cabecera (Proveedor · Compañía · N° factura proveedor)</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Elige el almacén (Almacén aceptado o por fila)</span>
+      <strong>Almacén aceptado</strong> (arriba del documento): si lo llenas, ese almacén se aplica
+      <strong>a todos los artículos</strong> que agregues después.<br><br>
+      <strong>BASE CENTRAL (caso normal)</strong><br>
+      Pon en Almacén aceptado: <code>Base - BC</code> (ahí entra casi toda la mercancía de central).<br><br>
+      <strong>COMPUCLICK (varios almacenes en la misma compra)</strong><br>
+      Si en una sola factura vas a meter cosas en almacenes distintos
+      (ej. <code>En Tránsito - CC</code>, <code>Por ingresar - CC</code>, <code>Disponible para Venta - CC</code>,
+      <code>En Reparación - CC</code>, <code>Cementerio - CC</code>),
+      <strong>deja Almacén aceptado vacío</strong> y elige el almacén
+      <strong>en cada fila del artículo</strong>.
+      <div class="tip">
+        <strong>Si toda la factura va al mismo almacén en Compuclick</strong>
+        Sí puedes usar Almacén aceptado (ej. todo a <code>Disponible para Venta - CC</code> o todo a <code>En Tránsito - CC</code>).
+      </div>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/01-items-total.png" alt="Asignar Almacén Aceptado arriba y Almacén Aceptado por fila en Productos"></div>
+        <figcaption>Fig. 1.3 — Asignar Almacén Aceptado (arriba) vs Almacén Aceptado en cada fila</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Agrega los productos</span>
+      En la tabla: código · cantidad · <strong>precio unitario igual a la factura del proveedor</strong>.<br>
+      Si no usaste Almacén aceptado, revisa el almacén de <strong>cada fila</strong>.<br>
+      Revisa que el <strong>Total general</strong> coincida con la factura física.
+      <div class="tip">
+        <strong>Tip decimales</strong>
+        Si el proveedor trae más de 2 decimales y no cuadra el centavo, usa <strong>Monto de descuento adicional</strong> para empatar el total (caso TECHLAND).
+      </div>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/01-items-con-total.png" alt="Filas de productos con cantidad, precio y total"></div>
+        <figcaption>Fig. 1.4 — Ítems y total</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Guardar → Enviar</span>
+      Primero <strong>Guardar</strong> (borrador). Revisa. Luego <strong>Enviar</strong>. Solo Enviado mueve el inventario.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/01-enviado.png" alt="Factura de compra Enviada / Impagado"></div>
+        <figcaption>Fig. 1.5 — Documento Enviado</figcaption>
+      </figure>
+    </li>
+  </ol>
+
+  <h3>Si el producto tiene IMEI / serial</h3>
+  <div class="idea">
+    <strong>Antes</strong>
+    El artículo debe haberse creado con <strong>Posee número de serie</strong> ✅ (ver <a href="#sop-crear">Crear un artículo</a>).
+    La <strong>cantidad</strong> de la fila debe ser igual al número de IMEI que vas a pegar (1 serial = 1 unidad).
+  </div>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">En la fila del producto, pulsa el lapicito (Editar)</span>
+      En la tabla Productos, a la derecha de la fila, verás un icono de <strong>lápiz</strong>.
+      Pasa el mouse: debe decir <strong>Editar</strong>. Haz clic ahí. Se abre la ventana
+      <strong>Editando fila #…</strong>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/01-serial-lapiz.png" alt="Icono lápiz Editar en la fila del producto"></div>
+        <figcaption>Fig. 1.6a — Pulsa el lapicito (Editar) en la fila</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Haz scroll hacia abajo dentro de esa ventana</span>
+      La caja de seriales <strong>no está arriba</strong>. Baja con la rueda del mouse o la barra
+      de la derecha hasta la sección de almacén / números de serie.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/01-serial-scroll.png" alt="Ventana Editando fila — bajar con scroll"></div>
+        <figcaption>Fig. 1.6b — Scroll down hasta llegar a Número de serie</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Ingresa los IMEI / seriales</span>
+      <ol style="margin:6px 0 0; padding-left:18px;">
+        <li>Marca <strong>Utilice los campos número de serie / lote</strong> (si no está marcada).</li>
+        <li>En el recuadro <strong>Número de serie</strong>, pega o pistolea <strong>un IMEI por línea</strong>
+            (o separados como indique la pantalla).</li>
+        <li>Cuenta: si la cantidad de la fila es 7, deben ser <strong>7 seriales</strong>.</li>
+        <li>Revisa que el <strong>Almacén</strong> de esa fila sea el correcto (ej. <code>Base - BC</code>).</li>
+        <li>Cierra / confirma la fila y vuelve a la factura.</li>
+      </ol>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/01-serial-ingresados.png" alt="Recuadro Número de serie con IMEI ingresados"></div>
+        <figcaption>Fig. 1.6c — Recuadro Número de serie (IMEI ingresados)</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Repite por cada fila que lleve serial</span>
+      Si hay varios modelos con IMEI, abre el lapicito de <strong>cada</strong> fila y carga sus seriales.
+      Luego <strong>Guardar → Enviar</strong> la factura.
+    </li>
+  </ol>
+
+  <div class="check">
+    <strong>Cómo sé que quedó bien</strong>
+    <ul>
+      <li><strong>Balance de inventario</strong> · misma Compañía · el artículo subió en el almacén que elegiste (ej. <code>Base - BC</code> o <code>Disponible para Venta - CC</code>).</li>
+      <li>Si hay IMEI: lista <strong>Serial No</strong> → buscar un IMEI → almacén correcto.</li>
+      <li>Estado <strong>Impagado</strong> o <strong>Atrasado</strong> = factura verificada; falta que el <strong>área de CxP / pagos</strong> reporte el pago.</li>
+    </ul>
+  </div>
+
+  <div class="warn">
+    <strong>Errores típicos</strong>
+    Compañía equivocada · poner Almacén aceptado en CC cuando cada ítem va a un almacén distinto ·
+    precio distinto a la factura física · cantidad ≠ número de seriales · no abrir el lapicito y creer
+    que el IMEI se pone en la descripción · Enviar sin revisar total.
+  </div>
+</section>
+
+<!-- ========== SOP 02 ========== -->
+<section class="sop" id="sop-02">
+  <div class="sop-head">
+    <span class="badge">SOP-02 · Venta a sede</span>
+    <h2>Hacer una venta a una sede</h2>
+  </div>
+
+  <div class="idea">
+    <strong>Para qué sirve</strong>
+    Cuando Central (Base Central o Compuclick) le entrega mercancía a una tienda Nuovocell,
+    se hace una <strong>Factura de venta</strong> al cliente NUOVOCELL C.A. indicando la <strong>Sede</strong>.
+    Así baja el stock de central y la tienda queda debiendo.
+    Después hay un segundo documento (compra intercompany) para que el stock aparezca en la tienda.
+    Docs: <a href="https://docs.frappe.io/erpnext/inter-company-invoices">Inter Company Invoices</a>
+  </div>
+
+  <h3>Pasos — lado central (tú)</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Entra al módulo Ventas</span>
+      En el menú principal, haz clic en el icono <strong>Ventas</strong>.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/02-modulo-ventas.png" alt="Menú principal — módulo Ventas"></div>
+        <figcaption>Fig. 2.1 — Menú principal · Ventas</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Abre Factura de Venta</span>
+      Dentro de Ventas, elige <strong>Factura de Venta</strong>
+      (en el menú de la izquierda o en la tarjeta del tablero). Hay dos sitios; cualquiera de los dos sirve.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/02-elegir-factura-venta.png" alt="Ventas — Factura de Venta en menú y en tablero"></div>
+        <figcaption>Fig. 2.2 — Elige Factura de Venta</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Pulsa + Agregar Factura de Venta</span>
+      En la lista, arriba a la derecha, pulsa <strong>+ Agregar Factura de Venta</strong>.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/02-lista-agregar-fv.png" alt="Botón + Agregar Factura de Venta"></div>
+        <figcaption>Fig. 2.3 — + Agregar Factura de Venta</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Elige Compañía, Cliente y Sede</span>
+      Estos campos se llenan <strong>dentro</strong> de la factura nueva (no antes).
+      Varias personas tienen acceso a más de una compañía: aquí eliges de dónde sale la mercancía.
+      <table>
+        <tr><th>Campo</th><th>Qué poner</th></tr>
+        <tr><td>Compañía</td><td><strong>BASE CENTRAL</strong> o <strong>COMPUCLICK</strong> (desde donde sales). No NUOVOCELL.</td></tr>
+        <tr><td>Cliente</td><td><strong>NUOVOCELL C.A.</strong></td></tr>
+        <tr><td>Sede Nuovocell</td><td>La tienda exacta (Free Market, Av. Lara, Baruta…). Revisa dos veces.</td></tr>
+      </table>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/02-cliente-sede.png" alt="Compañía BASE CENTRAL, Cliente NUOVOCELL C.A., Sede Nuovocell"></div>
+        <figcaption>Fig. 2.4 — Compañía · Cliente · Sede</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Productos, almacén y precio</span>
+      Agrega código · cantidad · precio (según regla del equipo, normalmente con % a sede).<br>
+      <strong>Almacén de origen</strong> / almacén de cada fila = de dónde sale la mercancía, por ejemplo:
+      <code>Base - BC</code> (Base Central) o <code>Disponible para Venta - CC</code> (Compuclick).<br>
+      Centro de costos = el de esa compañía (ej. <code>Principal - BC</code>).
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/02-almacen-origen.png" alt="Filas con almacén de origen Base - BC o Disponible para Venta - CC"></div>
+        <figcaption>Fig. 2.5 — Ítems y almacén de origen</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Si hay IMEI: lapicito → seriales (igual que en compra)</span>
+      En cada fila con equipo: lapicito <strong>Editar</strong> → scroll down → pegar un IMEI por unidad.
+      Cantidad de la fila = número de seriales.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/02-seriales-fv.png" alt="Seriales / IMEI en la Factura de venta"></div>
+        <figcaption>Fig. 2.6 — IMEI en la venta</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Guardar → Enviar</span>
+      Revisa Compañía, Sede y almacén otra vez. Luego <strong>Enviar</strong>.
+    </li>
+  </ol>
+
+  <h3>Pasos — lado tienda (intercompany)</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">En la FV enviada: Crear → Factura de compra intercompany</span>
+      Con la Factura de venta ya <strong>Enviada</strong>, arriba pulsa <strong>Crear</strong> →
+      <strong>Factura de compra intercompany</strong>.
+      Se abre sola una factura en compañía <strong>NUOVOCELL</strong>.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/02-crear-intercompany.png" alt="Menú Crear → Factura de compra intercompany"></div>
+        <figcaption>Fig. 2.7 — Crear intercompany</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Verifica que los datos se rellenaron solos (sobre todo el almacén)</span>
+      Al pulsar el botón, el sistema <strong>rellena automáticamente</strong> productos, cantidades,
+      precios y el <strong>Almacén aceptado</strong> de la sede (ej. <code>DISPONIBLE - FREE MARKET E-15 / E-16 - NC</code>,
+      <code>DISPONIBLE - BARUTA - NC</code>, etc.).
+      <strong>Revisa que el almacén sea el Disponible de ESA sede</strong> (debe decir DISPONIBLE y el nombre de la tienda).
+      No elijas solo <code>BARUTA - NC</code> u otra carpeta sin la palabra DISPONIBLE.
+      Si algo no cuadra, corrígelo ahora.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/02-pi-intercompany-almacen.png" alt="PI intercompany con almacén DISPONIBLE de la sede"></div>
+        <figcaption>Fig. 2.8 — Verificar almacén y datos auto-rellenados</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Primero Guardar (borrador), después Enviar</span>
+      <ol style="margin:6px 0 0; padding-left:18px;">
+        <li>Pulsa <strong>Guardar</strong> → queda en <strong>Borrador</strong>. Así no se pierde el documento.</li>
+        <li>Revisa otra vez Compañía NUOVOCELL, almacén Disponible de la sede y totales.</li>
+        <li>Pulsa <strong>Enviar</strong> (validar). Solo entonces el stock entra a la tienda.</li>
+      </ol>
+      <div class="warn">
+        <strong>Importante</strong>
+        Si cierras la pantalla sin Guardar el borrador, la factura de compra intercompany se pierde y tienes que crearla de nuevo desde la FV.
+        Siempre: Guardar primero → luego Enviar.
+      </div>
+    </li>
+    <li>
+      <span class="titulo">(Opcional) Imprimir PDF para la tienda</span>
+      En la FV de central → Imprimir → formato <strong>FV - Base Central</strong> (o el de CC si aplica).
+    </li>
+  </ol>
+
+  <div class="check">
+    <strong>Cómo sé que quedó bien</strong>
+    <ul>
+      <li>FV de central Enviada (no Borrador).</li>
+      <li>Compra intercompany también <strong>Enviada</strong> (no solo borrador).</li>
+      <li>En la FV, pestaña <strong>Conexiones</strong> → aparece la Factura de compra intercompany.</li>
+      <li>Balance en NUOVOCELL · almacén <code>DISPONIBLE - [SEDE] - NC</code> subió.</li>
+    </ul>
+  </div>
+
+  <div class="warn">
+    <strong>Errores típicos</strong>
+    FV hecha en NUOVOCELL (al revés) · Sede equivocada · almacén sin la palabra DISPONIBLE ·
+    cerrar la intercompany sin Guardar (se pierde) · dejarla en borrador y creer que ya entró el stock.
+  </div>
+</section>
+
+<!-- ========== SOP 03 ========== -->
+<section class="sop" id="sop-03">
+  <div class="sop-head">
+    <span class="badge">SOP-03 · Revisar facturas</span>
+    <h2>Revisar mis facturas (compra y venta)</h2>
+  </div>
+
+  <div class="idea">
+    <strong>Para qué sirve</strong>
+    Antes de preguntar “¿ya salió?” o “¿cuánto debe?”, miras el <strong>estado</strong> del documento y las <strong>conexiones</strong>.
+  </div>
+
+  <div class="tip">
+    <strong>Qué significan Impagado y Atrasado</strong>
+    Si el estado es <strong>Impagado</strong> o <strong>Atrasado</strong>, la factura ya está
+    <strong>verificada / Enviada</strong> (el stock y la deuda ya cuentan).
+    Solo falta que el <strong>área de CxP / pagos</strong> reporte el pago en ERPNext.
+    No significa que esté mal hecha ni en borrador.
+  </div>
+
+  <h3>A) Facturas de compra (lo que te vendieron a ti)</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Lista Factura de compra</span>
+      Filtra por Compañía (CC o BC) y fechas. Opcional: Proveedor.
+      En la columna <strong>Estado</strong> verás Impagado, Atrasado, Pagado, etc.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/03-lista-fc.png" alt="Lista Factura de compra con estados Impagado / Atrasado"></div>
+        <figcaption>Fig. 3.1 — Lista compras (Impagado / Atrasado = lista para que CxP reporte el pago)</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Abre una factura y mira</span>
+      <table>
+        <tr><th>Pregunta</th><th>Dónde se ve</th></tr>
+        <tr><td>¿Ya está verificada?</td><td>Estado <strong>Impagado</strong> o <strong>Atrasado</strong> (o Pagado / Parcial) — ya no es Borrador</td></tr>
+        <tr><td>¿Subió stock?</td><td>Balance de inventario en el almacén que elegiste</td></tr>
+        <tr><td>¿Número del proveedor?</td><td>Campo Factura de proveedor No.</td></tr>
+        <tr><td>¿Quién registra el pago?</td><td>El <strong>área de CxP / pagos</strong> — mientras esté Impagado o Atrasado, el pago aún no está reportado</td></tr>
+      </table>
+    </li>
+  </ol>
+
+  <h3>B) Facturas de venta a sedes (lo que tú les facturaste)</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Lista Factura de venta · Cliente NUOVOCELL C.A.</span>
+      Filtra Compañía + fechas. Mira columna <strong>Sede</strong>, <strong>Estado</strong> y <strong>Monto pendiente</strong>.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/03-lista-fv.png" alt="Lista Factura de venta con Sede y Monto pendiente"></div>
+        <figcaption>Fig. 3.2 — Ventas a sedes</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Tres preguntas por cada FV</span>
+      <table>
+        <tr><th>Pregunta</th><th>Dónde</th></tr>
+        <tr><td>¿Está verificada?</td><td>Estado Impagado / Atrasado / Parcial / Pagado (no Borrador)</td></tr>
+        <tr><td>¿Llegó al inventario de la tienda en el sistema?</td><td>Conexiones → Factura de compra intercompany (enviada)</td></tr>
+        <tr><td>¿Cuánto debe todavía esa sede?</td><td>Monto pendiente · Impagado / Atrasado = pendiente de abono</td></tr>
+      </table>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/03-conexiones-fv.png" alt="Pestaña Conexiones de una Factura de venta"></div>
+        <figcaption>Fig. 3.3 — Conexiones intercompany</figcaption>
+      </figure>
+    </li>
+  </ol>
+
+  <div class="tip">
+    <strong>Informe útil</strong>
+    Para ver deudas por sede: informe / vista <strong>CxC por Cliente y Sede</strong> (lado central). Guía del equipo: one pager de informes.
+  </div>
+</section>
+
+<!-- ========== SOP 04 ========== -->
+<section class="sop" id="sop-04">
+  <div class="sop-head">
+    <span class="badge">SOP-04 · Inventario / IMEI</span>
+    <h2>Revisar inventario en el almacén</h2>
+  </div>
+
+  <div class="idea">
+    <strong>Qué es</strong>
+    El <strong>Balance de inventario</strong> responde “¿cuántas unidades hay aquí ahora?”.<br>
+    Los <strong>IMEI</strong> no salen en ese balance: se buscan en <strong>Serial No</strong>.<br>
+    Docs: <a href="https://docs.frappe.io/erpnext/stock-balance">Stock Balance</a>
+  </div>
+
+  <h3>Pasos — cantidades por almacén</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Busca Balance de inventario (Stock Balance)</span>
+      Ctrl+K → <strong>Balance de inventario</strong> / Stock Balance.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/04-abrir-balance.png" alt="Abrir Balance de inventario"></div>
+        <figcaption>Fig. 4.1 — Abrir el informe</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Pon los filtros</span>
+      <table>
+        <tr><th>Filtro</th><th>Ejemplo</th></tr>
+        <tr><td>Compañía</td><td>COMPUCLICK o BASE CENTRAL</td></tr>
+        <tr><td>Almacén</td><td>El nombre completo, ej. <code>Base - BC</code> o <code>Disponible para Venta - CC</code></td></tr>
+        <tr><td>Hasta / fecha</td><td>Hoy, o una fecha <strong>igual o posterior</strong> a cuando cargaste Opening / compras</td></tr>
+        <tr><td>Artículo (opcional)</td><td>Un código concreto</td></tr>
+      </table>
+      <div class="warn">
+        <strong>Importante — Generar / Reconstruir informe</strong>
+        Después de poner los filtros, pulsa el botón <strong>Generar informe</strong> o
+        <strong>Reconstruir informe</strong> (según cómo diga la pantalla).
+        Si no lo pulsas, pueden salir <strong>datos viejos</strong> o <strong>ningún dato</strong>, aunque el stock sí esté cargado.
+      </div>
+      <div class="warn">
+        <strong>Si “no aparece” stock que sí cargaste</strong>
+        Casi siempre la fecha <strong>Hasta</strong> es anterior al documento. Súbela y vuelve a pulsar Generar / Reconstruir informe.
+      </div>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/04-filtros-balance.png" alt="Filtros del Balance y botón Generar / Reconstruir informe"></div>
+        <figcaption>Fig. 4.2 — Filtros + Generar / Reconstruir informe</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Revisa el resultado</span>
+      Mira cantidad y valor. Exporta si lo pide el <strong>auditor</strong>.
+    </li>
+  </ol>
+
+  <h3>Pasos — dónde está un IMEI / serial</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Entra al módulo Almacén (o busca con Ctrl+K)</span>
+      En el menú principal abre <strong>Almacén</strong>.
+      Alternativa: Ctrl+K → escribe <strong>Serial No</strong> o <strong>Número de serie</strong> y ábrelo directo.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/04-modulo-almacen.png" alt="Menú / módulo Almacén"></div>
+        <figcaption>Fig. 4.3 — Módulo Almacén</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Ubica Número de serie en la pantalla</span>
+      En el tablero de Almacén, busca la tarjeta <strong>Número de serie y de lote</strong>
+      y haz clic en <strong>Número de serie</strong> (también aparece en el menú de la izquierda).
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/04-boton-serial-no.png" alt="Tarjeta Número de serie y de lote — clic en Número de serie"></div>
+        <figcaption>Fig. 4.4 — Clic en Número de serie</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Busca el IMEI y lee almacén + estado</span>
+      En la lista, usa el filtro <strong>Identificador</strong> (pega el IMEI) o busca por código de producto.
+      Abre la fila: mira <strong>Almacén</strong> y la columna <strong>Estado</strong>.
+      <table>
+        <tr><th>Estado</th><th>Qué significa</th></tr>
+        <tr><td><strong>Activo</strong></td><td>El equipo está <strong>dentro de un almacén</strong> (disponible en el sistema).</td></tr>
+        <tr><td><strong>Delivered</strong> (entregado)</td><td>Ya se <strong>envió / vendió</strong> (salió del almacén).</td></tr>
+        <tr><td><strong>Inactivo</strong></td><td><strong>No está disponible</strong> (por ejemplo se canceló la compra, se anuló el movimiento, o el serial quedó fuera de uso).</td></tr>
+      </table>
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/04-serial-imei-estado.png" alt="Lista Número de serie con IMEI, almacén y estado Activo / Delivered"></div>
+        <figcaption>Fig. 4.5 — IMEI · almacén · estado</figcaption>
+      </figure>
+    </li>
+  </ol>
+
+  <h3>Tres reportes clave de seriales (leyenda)</h3>
+  <div class="idea">
+    <strong>Para qué sirven</strong>
+    El Balance dice “cuántas unidades hay”. Estos tres reportes responden preguntas
+    <em>por IMEI</em>. Están en Almacén → tarjeta <strong>Número de serie y de lote</strong> (o en Informes).
+  </div>
+  <table>
+    <tr>
+      <th>Reporte</th>
+      <th>Para qué lo usas</th>
+    </tr>
+    <tr>
+      <td><strong>Número de serie</strong><br>(Serial No)</td>
+      <td>Encontrar un <strong>IMEI / serial concreto</strong>: en qué almacén está y su estado (Activo, Delivered, Inactivo).</td>
+    </tr>
+    <tr>
+      <td><strong>Serial No and Batch Traceability</strong><br>(Trazabilidad de serial y lote)</td>
+      <td>Conectar ese serial con los <strong>documentos</strong> por los que pasó (factura de compra, factura de venta, traslados…) y <strong>cuándo</strong> se hizo cada movimiento.</td>
+    </tr>
+    <tr>
+      <td><strong>Número de serie del libro mayor</strong><br>(Serial No Ledger)</td>
+      <td>Ver qué seriales <strong>específicos</strong> de un equipo entraron o salieron en cada compra/venta y <strong>a qué costo</strong>.</td>
+    </tr>
+  </table>
+  <div class="tip">
+    <strong>Cómo elegir rápido</strong>
+    <ul style="margin:6px 0 0; padding-left:18px;">
+      <li>“¿Dónde está este IMEI?” → <strong>Número de serie</strong></li>
+      <li>“¿En qué factura se compró / vendió?” → <strong>Serial No and Batch Traceability</strong></li>
+      <li>“¿Qué IMEI salieron en esa venta y a qué costo?” → <strong>Número de serie del libro mayor</strong></li>
+    </ul>
+  </div>
+
+  <div class="check">
+    <strong>Otras preguntas (sin serial)</strong>
+    <table>
+      <tr><th>Pregunta</th><th>Dónde</th></tr>
+      <tr><td>¿Cuántas unidades hay por almacén?</td><td>Balance de inventario (arriba)</td></tr>
+      <tr><td>¿Qué entró y salió de un artículo (sin IMEI)?</td><td>Libro mayor de inventario (Stock Ledger)</td></tr>
+      <tr><td>¿Qué compré este mes?</td><td>Registro de compras (Purchase Register)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ========== SOP 05 ========== -->
+<section class="sop" id="sop-05">
+  <div class="sop-head">
+    <span class="badge">SOP-05 · Devolución a proveedor</span>
+    <h2>Devolución a proveedor (y verificar inventario)</h2>
+  </div>
+
+  <div class="idea">
+    <strong>Para qué sirve</strong>
+    Cuando hay que devolver mercancía al proveedor (defectuosa, sobrante, error de pedido),
+    <strong>no borres ni canceles</strong> la compra original.
+    Se crea una <strong>devolución / nota de débito</strong> ligada a esa Factura de compra:
+    baja el stock del almacén y baja (o genera crédito en) lo que se le debe al proveedor.
+    Docs: <a href="https://docs.frappe.io/erpnext/debit-note">Debit Note</a> ·
+    <a href="https://docs.frappe.io/erpnext/purchase-invoice">Purchase Invoice</a>
+  </div>
+
+  <div class="warn">
+    <strong>No confundir</strong>
+    Esto es devolución a un <strong>proveedor externo</strong> (compra de BC o CC).
+    No es la devolución de una sede Nuovocell a central (ese es otro flujo intercompany).
+  </div>
+
+  <h3>Pasos</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Entra a Compras → Factura de compra</span>
+      Menú principal → <strong>Compras</strong> → <strong>Factura de compra</strong>
+      (o Ctrl+K → Factura de compra).
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/05-modulo-compras.png" alt="Módulo Compras y lista Factura de compra"></div>
+        <figcaption>Fig. 5.1 — Lista Factura de compra</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Abre la compra original (ya Enviada)</span>
+      Busca la factura del proveedor de la que vas a devolver
+      (por N° de factura de proveedor, proveedor, fechas o identificador).
+      Debe estar <strong>Enviada</strong> (Impagado / Atrasado / Pagado…), no en Borrador.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/05-compra-original.png" alt="Factura de compra original abierta"></div>
+        <figcaption>Fig. 5.2 — Compra original</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Crear → Retorno / Nota de Crédito</span>
+      Arriba, botón <strong>Crear</strong> → <strong>Retorno / Nota de Crédito</strong>
+      (en inglés: Return / Debit Note).
+      Se abre una factura nueva con la casilla <strong>Es Retorno (Nota de Débito)</strong> marcada
+      y el enlace a la compra original.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/05-crear-devolucion-alt.png" alt="Menú Crear → Retorno / Nota de Crédito"></div>
+        <figcaption>Fig. 5.3 — Crear → Retorno / Nota de Crédito</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Deja solo lo que realmente vas a devolver</span>
+      <ul style="margin:6px 0 0; padding-left:18px;">
+        <li>Quita filas que no se devuelven.</li>
+        <li>Cantidad en negativo (ej. <code>-2</code> si devuelves 2 unidades) o la cantidad de devolución que muestre la pantalla.</li>
+        <li>Compañía = la misma de la compra (BASE CENTRAL o COMPUCLICK).</li>
+        <li>Proveedor = el mismo.</li>
+      </ul>
+      Los montos de la devolución suelen verse en <strong>negativo</strong> (a favor / contra la deuda).
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/05-montos-negativos.png" alt="Devolución con almacén y montos en negativo"></div>
+        <figcaption>Fig. 5.4 — Solo lo que se devuelve (montos en negativo)</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Almacén + Actualizar inventario (para que salga del stock)</span>
+      Confirma que <strong>Actualizar el inventario</strong> esté marcado (suele venir así en la devolución)
+      y que el <strong>Almacén</strong> sea de donde está la mercancía hoy, por ejemplo
+      <code>Base - BC</code> o <code>Disponible para Venta - CC</code>.
+      Si no actualiza inventario, baja la deuda pero <strong>el stock no sale</strong>.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/05-retorno-almacen.png" alt="Es Retorno + Actualizar inventario + Almacén"></div>
+        <figcaption>Fig. 5.5 — Stock que sale del almacén</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Si tiene IMEI: lapicito → seriales a devolver</span>
+      Igual que en la compra: lapicito <strong>Editar</strong> → scroll → pegar solo los IMEI que regresan al proveedor.
+      Cantidad de la fila = número de seriales.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/05-seriales.png" alt="Seriales / IMEI en la devolución"></div>
+        <figcaption>Fig. 5.6 — IMEI de la devolución</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Guardar (borrador) → revisar → Enviar</span>
+      Primero <strong>Guardar</strong>. Revisa totales (suelen ir en negativo / a favor).
+      Luego <strong>Enviar</strong>. Sin Enviar, el inventario no se mueve.
+    </li>
+  </ol>
+
+  <h3>Cómo verificar que sí salió del inventario</h3>
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Balance de inventario</span>
+      Abre Balance · misma Compañía · mismo Almacén · Generar / Reconstruir informe.
+      La cantidad del artículo debe haber <strong>bajado</strong> en las unidades devueltas.
+      <figure class="foto">
+        <div class="foto-slot"><img src="fotos/05-balance.png" alt="Balance después de la devolución — cantidad menor"></div>
+        <figcaption>Fig. 5.7 — Balance: stock bajó</figcaption>
+      </figure>
+    </li>
+    <li>
+      <span class="titulo">Si hay IMEI: Número de serie</span>
+      Busca cada IMEI devuelto. Ya no debería estar <strong>Activo</strong> en ese almacén
+      (pasa a Inactivo / fuera de disponibilidad según el caso).
+      Con <strong>Serial No and Batch Traceability</strong> puedes ver la devolución en la cadena de documentos.
+    </li>
+    <li>
+      <span class="titulo">Deuda con el proveedor</span>
+      En la compra original, el monto pendiente baja (o aparece crédito).
+      El área de CxP / pagos ve el efecto en Cuentas por pagar.
+    </li>
+  </ol>
+
+  <div class="check">
+    <strong>Cómo sé que quedó bien</strong>
+    <ul>
+      <li>Documento de devolución <strong>Enviado</strong> (estado Return / Retorno).</li>
+      <li>Balance: menos unidades en el almacén de origen.</li>
+      <li>IMEI: ya no Activo en ese almacén (si aplica).</li>
+      <li>Compra original sigue existiendo; no se borró.</li>
+    </ul>
+  </div>
+
+  <div class="warn">
+    <strong>Errores típicos</strong>
+    Borrar o cancelar la compra en vez de hacer devolución · sacar stock con un traslado inventado
+    y no tocar al proveedor · olvidar Actualizar inventario · devolver un IMEI que ya se vendió a una sede ·
+    cerrar sin Guardar / sin Enviar.
+  </div>
+</section>
+
+<footer>
+  Nuovocell · Guía SOP Equipo de compras · Usar en Google Chrome ·
+  Sistema: <a href="https://erp.nuovocell.com.ve">erp.nuovocell.com.ve</a>
+</footer>
+
+</div>
+
+<div id="lightbox" role="dialog" aria-label="Imagen ampliada" title="Clic o Esc para cerrar">
+  <img src="" alt="Vista ampliada">
+  <div class="lb-hint">Clic en cualquier parte o tecla Esc para cerrar</div>
+</div>
+<script>
+(function () {
+  var lb = document.getElementById("lightbox");
+  var lbImg = lb.querySelector("img");
+  function openLb(src, alt) {
+    lbImg.src = src;
+    lbImg.alt = alt || "Vista ampliada";
+    lb.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeLb() {
+    lb.classList.remove("open");
+    lbImg.removeAttribute("src");
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll(".foto-slot img").forEach(function (img) {
+    img.addEventListener("click", function (e) {
+      e.preventDefault();
+      openLb(img.currentSrc || img.src, img.alt);
+    });
+  });
+  lb.addEventListener("click", closeLb);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && lb.classList.contains("open")) closeLb();
+  });
+})();
+</script>
+</body>
+</html>
