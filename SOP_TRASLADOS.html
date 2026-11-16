@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOP — Traslados entre almacenes</title>
+<style>
+  :root {
+    --galaxy: #081F5C;
+    --planetary: #334EAC;
+    --universe: #7096D1;
+    --venus: #BAD6EB;
+    --ok: #1f7a45;
+    --bad: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f4f6fa;
+    color: #1d2433;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .page { max-width: 900px; margin: 0 auto; padding: 28px 24px 64px; }
+  header {
+    background: #fff;
+    border-left: 6px solid #0f766e;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 1px 3px rgba(8,31,92,.06);
+  }
+  header .brand {
+    color: var(--universe);
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  header h1 { margin: 6px 0 4px; color: var(--galaxy); font-size: 26px; }
+  header .meta { color: #55607a; font-size: 13px; }
+  nav.toc {
+    background: #fff;
+    border: 2px solid var(--galaxy);
+    border-radius: 12px;
+    padding: 18px 20px 20px;
+    margin-bottom: 28px;
+  }
+  nav.toc h2 { margin: 0 0 14px; font-size: 18px; color: var(--galaxy); }
+  nav.toc ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  nav.toc li a {
+    display: flex; align-items: center; gap: 12px; text-decoration: none;
+    color: var(--galaxy); font-weight: 650; font-size: 14px;
+    padding: 12px 14px; border-radius: 8px; border: 1px solid #d9e2ef; background: #f8fafc;
+  }
+  nav.toc .toc-num {
+    flex: 0 0 auto; min-width: 52px; text-align: center; font-size: 11px; font-weight: 800;
+    letter-spacing: .06em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; color: #fff;
+    background: #0f766e;
+  }
+  .sop {
+    background: #fff; border: 1px solid #e2e8f2; border-radius: 12px;
+    padding: 22px 24px 28px; margin-bottom: 36px;
+    box-shadow: 0 2px 10px rgba(8,31,92,.06); overflow: hidden; border-top: 6px solid #0f766e;
+  }
+  .sop-head {
+    margin: -22px -24px 18px; padding: 18px 24px 16px;
+    background: linear-gradient(180deg, #ecfdf5 0%, #fff 85%);
+    border-bottom: 1px solid #e2e8f2;
+  }
+  .sop-head h2 { margin: 0; color: var(--galaxy); font-size: 22px; }
+  .badge {
+    display: inline-block; color: #fff; font-size: 12px; font-weight: 800;
+    letter-spacing: .08em; text-transform: uppercase; padding: 5px 10px; border-radius: 6px;
+    margin-bottom: 8px; background: #0f766e;
+  }
+  h3 { margin: 18px 0 8px; color: #0f766e; font-size: 15px; }
+  .idea, .tip, .warn, .check {
+    border-radius: 6px; padding: 10px 14px; margin: 10px 0 14px;
+  }
+  .idea { border: 1px solid var(--venus); border-left: 4px solid var(--planetary); background: #fafcff; }
+  .tip { border: 1px solid #c8e6d0; border-left: 4px solid var(--ok); background: #f6fbf7; }
+  .warn { border: 1px solid #f0c2c2; border-left: 4px solid var(--bad); background: #fff8f8; }
+  .check { border: 1px solid #d5dde8; border-left: 4px solid #55607a; background: #f8f9fb; }
+  .idea > strong:first-child, .tip > strong:first-child,
+  .warn > strong:first-child, .check > strong:first-child { display: block; margin-bottom: 4px; }
+  ol.pasos { margin: 0; padding-left: 0; list-style: none; counter-reset: paso; }
+  ol.pasos > li {
+    counter-increment: paso; position: relative;
+    padding: 12px 12px 12px 52px; margin: 0 0 10px;
+    background: #f8fafc; border: 1px solid #e8eef6; border-radius: 8px;
+  }
+  ol.pasos > li::before {
+    content: counter(paso); position: absolute; left: 12px; top: 12px;
+    width: 28px; height: 28px; border-radius: 50%; background: #0f766e; color: #fff;
+    font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+  ol.pasos > li .titulo { font-weight: 700; color: var(--galaxy); display: block; margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0 14px; }
+  th, td { border: 1px solid #d9e2ef; padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { background: #ecfdf5; color: var(--galaxy); }
+  .foto-slot {
+    border: 2px dashed #7bc4b0; background: #f0fdf9; color: #3d6b5e;
+    border-radius: 8px; min-height: 88px; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 14px; font-size: 13px; margin: 8px 0 4px;
+  }
+  figure.foto { margin: 10px 0 4px; padding: 0; }
+  figcaption { font-size: 12px; color: #55607a; margin: 0 0 12px; }
+  figcaption::after { content: " · clic en la imagen para ampliar"; color: #8a96ab; }
+  .foto-slot img {
+    max-width: 100%; height: auto; border-radius: 4px; display: block; cursor: zoom-in;
+  }
+  .foto-slot img:hover { outline: 2px solid #0f766e; outline-offset: 2px; }
+  #lightbox {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(8, 31, 92, 0.88); align-items: center; justify-content: center;
+    padding: 24px; cursor: zoom-out;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox img {
+    max-width: min(96vw, 1400px); max-height: 92vh; width: auto; height: auto;
+    border-radius: 6px; box-shadow: 0 8px 40px rgba(0,0,0,.45); background: #fff;
+  }
+  #lightbox .lb-hint {
+    position: absolute; bottom: 16px; left: 0; right: 0; text-align: center;
+    color: #c5d4ef; font-size: 13px;
+  }
+  .tree {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0 16px;
+  }
+  .tree ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.55; }
+  .tree .grp { font-weight: 700; color: #64748b; }
+  .tree .leaf { color: #0f766e; font-weight: 600; }
+  .tree h4 { margin: 0 0 8px; font-size: 13px; }
+  footer { color: #55607a; font-size: 12px; margin-top: 8px; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 12.5px; background: #eef3fb; padding: 1px 5px; border-radius: 4px; }
+  a { color: #1d4ed8; }
+
+  /* Visuales */
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 8px; margin: 14px 0 18px; padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f2;
+  }
+  .wh {
+    min-width: 118px; max-width: 150px; padding: 10px 8px; border-radius: 10px;
+    text-align: center; font-size: 12px; font-weight: 700; color: #fff; line-height: 1.3;
+    box-shadow: 0 2px 6px rgba(8,31,92,.12);
+  }
+  .wh small { display: block; font-weight: 500; opacity: .9; font-size: 10px; margin-top: 3px; }
+  .wh.transito { background: #b45309; }
+  .wh.ingresar { background: #7c3aed; }
+  .wh.disp { background: #047857; }
+  .wh.rep { background: #1d4ed8; }
+  .wh.cem { background: #334155; }
+  .wh.pr { background: #be123c; }
+  .wh.grupo { background: #94a3b8; color: #1e293b; border: 2px dashed #64748b; }
+  .arrow {
+    font-size: 22px; color: #0f766e; font-weight: 800; line-height: 1;
+  }
+  .mock {
+    border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; margin: 12px 0 16px;
+    font-size: 12.5px; background: #fff;
+  }
+  .mock-bar {
+    background: #081F5C; color: #fff; padding: 8px 12px; font-weight: 700; font-size: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .mock-bar span { background: #10b981; color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 11px; }
+  .mock-body { padding: 12px 14px 14px; }
+  .mock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-bottom: 10px; }
+  .field label { display: block; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
+  .field .box {
+    border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; background: #f8fafc; margin-top: 2px;
+  }
+  .field .box.hi { background: #ecfdf5; border-color: #0f766e; font-weight: 700; color: #0f766e; }
+  .mock-table { width: 100%; font-size: 11.5px; }
+  .mock-table th { background: #0f766e; color: #fff; border-color: #0f766e; }
+  .vs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;
+  }
+  .vs > div { border-radius: 10px; padding: 12px 14px; }
+  .vs .si { background: #ecfdf5; border: 1px solid #86efac; }
+  .vs .no { background: #fff1f2; border: 1px solid #fecaca; }
+  .vs h4 { margin: 0 0 6px; font-size: 13px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+  .legend span {
+    font-size: 11px; padding: 4px 8px; border-radius: 999px; color: #fff; font-weight: 700;
+  }
+  @media (max-width: 640px) {
+    .mock-grid, .vs, .tree { grid-template-columns: 1fr; }
+    .wh { min-width: 100%; max-width: none; }
+  }
+  @media print {
+    body { background: #fff; }
+    .page { max-width: none; padding: 0; }
+    nav.toc { break-after: page; }
+    .sop { break-inside: avoid; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="brand">Nuovocell · Compuclick · Base Central · ERPNext v16</div>
+  <h1>Cómo trasladar mercancía entre almacenes</h1>
+  <p class="meta">Guía para Oscar / Andrea / Martin · 16 nov 2026 · El equipo se mueve; el costo se queda con el IMEI.<br>
+  Otras guías: <a href="SOP_COMPRAS_OSCAR.html">Compras</a> ·
+  Docs oficiales: <a href="https://docs.frappe.io/erpnext/stock-entry">Stock Entry</a> ·
+  <a href="https://docs.frappe.io/erpnext/stock-entry-purpose">Propósitos</a> ·
+  <a href="https://docs.frappe.io/erpnext/how-to-manage-material-transfers-and-goods-in-transit">Bienes en tránsito</a> ·
+  <a href="https://docs.frappe.io/erpnext/warehouse">Almacén</a></p>
+</header>
+
+<nav class="toc">
+  <h2>En esta guía</h2>
+  <ol>
+    <li><a href="#idea"><span class="toc-num">01</span> <span>Qué es un traslado (y qué no es)</span></a></li>
+    <li><a href="#mapa"><span class="toc-num">02</span> <span>Mapa de almacenes Compuclick</span></a></li>
+    <li><a href="#directo"><span class="toc-num">03</span> <span>Traslado directo (el de todos los días)</span></a></li>
+    <li><a href="#serial"><span class="toc-num">04</span> <span>Si el artículo tiene IMEI / serial</span></a></li>
+    <li><a href="#transito"><span class="toc-num">05</span> <span>Cuando el viaje tarda (Add to Transit)</span></a></li>
+    <li><a href="#casos"><span class="toc-num">06</span> <span>Casos reales CC</span></a></li>
+    <li><a href="#check"><span class="toc-num">07</span> <span>Cómo sé que quedó bien · errores</span></a></li>
+  </ol>
+</nav>
+
+<!-- 01 -->
+<section class="sop" id="idea">
+  <div class="sop-head">
+    <span class="badge">01 · Idea</span>
+    <h2>El laptop no se vende: solo cambia de cuarto</h2>
+  </div>
+
+  <div class="idea">
+    <strong>Concepto</strong>
+    Un <b>traslado</b> mueve stock de un almacén hoja a otro almacén hoja <b>de la misma Company</b>.
+    No hay cliente, no hay factura, no hay gasto. El valor del inventario no cambia: sale de un cuarto y entra a otro.
+    En ERPNext el documento es <b>Entrada de existencias</b> (Stock Entry) con tipo
+    <b>Transferencia de material</b> (Material Transfer).
+  </div>
+
+  <div class="idea">
+    <strong>Analogía Profit / Excel</strong>
+    En Profit era un movimiento entre almacenes (8 POR FALTA DE REPUESTO → Disponible).
+    En Excel movías la cantidad de una columna a otra.
+    Aquí queda un documento con quién, cuándo, de dónde, a dónde y qué IMEI.
+  </div>
+
+  <div class="vs">
+    <div class="si">
+      <h4>Sí: Transferencia de material</h4>
+      <p><code>P.R.02 - CC</code> → <code>Disponibles Venta - CC</code> ·
+      <code>En Transito - CC</code> → <code>LAPTOPS CON DETALLE - CC</code>.
+      Misma Company (COMPUCLICK).</p>
+    </div>
+    <div class="no">
+      <h4>No uses traslado</h4>
+      <p><b>Venta a sede Nuovocell</b> = Factura de venta (otra Company).<br>
+      <b>Sacar del ERP</b> (ya no existe) = Reconciliación o Expedición.<br>
+      <b>Regalo</b> = Expedición tipo Regalo.<br>
+      <b>Cambiar precio del IMEI</b> = Reconciliación, no traslado.</p>
+    </div>
+  </div>
+
+  <div class="warn">
+    <strong>Regla de oro</strong>
+    Siempre almacén <b>hoja</b> (el que tiene mercancía: <code>DISPONIBLE - …</code>, <code>P.R.02 - CC</code>).
+    Nunca el grupo (<code>COMPUCLICK</code>, <code>BARUTA - NC</code>).
+    El Cost Center debe ser de la misma Company (<code>Principal - CC</code> en docs CC).
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="sop" id="mapa">
+  <div class="sop-head">
+    <span class="badge">02 · Mapa</span>
+    <h2>Dónde vive la mercancía en Compuclick</h2>
+  </div>
+
+  <p>Árbol live (nov 2026). Las <b>carpetas</b> son grupo: no se eligen en un traslado. Los puntos son <b>hoja</b>: ahí sí hay stock.</p>
+
+  <figure class="foto">
+    <div class="foto-slot"><img src="fotos/2-1-arbol-almacenes-cc.png" alt="Árbol de almacenes COMPUCLICK en ERPNext: carpetas grupo y hojas con stock"></div>
+    <figcaption>Foto 2.1 — Vista Árbol · Company COMPUCLICK. Carpeta = no elegir. Punto = origen o destino.</figcaption>
+  </figure>
+
+  <div class="tree">
+    <div class="no" style="background:#fff1f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;">
+      <h4>Carpetas — no usar en el traslado</h4>
+      <ul>
+        <li class="grp">COMPUCLICK</li>
+        <li class="grp">Todos los almacenes - CC</li>
+        <li class="grp">BATERIA / CARGADOR / DISCO DURO - CC</li>
+        <li class="grp">LAPTOP - CC</li>
+        <li class="grp">POR REPARAR - CC</li>
+        <li class="grp">POR REPUESTO - CC</li>
+        <li class="grp">TECLADO - CC</li>
+        <li class="grp">TECNICOS - CC</li>
+      </ul>
+    </div>
+    <div class="si" style="background:#ecfdf5;border:1px solid #86efac;border-radius:10px;padding:12px 14px;">
+      <h4>Hojas — sí (ejemplos de laptops)</h4>
+      <ul>
+        <li class="leaf">En Transito - CC</li>
+        <li class="leaf">LAPTOPS CON DETALLE - CC</li>
+        <li class="leaf">Disponibles Venta - CC</li>
+        <li class="leaf">LAPTOPS - CC</li>
+        <li class="leaf">P.R.01 - CC · P.R.02 - CC</li>
+        <li class="leaf">POR FALTA DE REPUESTO - CC</li>
+        <li class="leaf">POR CAMBIO DE BATERIA - CC</li>
+        <li class="leaf">USO INTERNO - CC</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="warn">
+    <strong>P.R.02 y “por falta de repuesto” no son lo mismo</strong>
+    <code>P.R.02 - CC</code> está bajo <b>POR REPARAR</b>.
+    <code>POR FALTA DE REPUESTO - CC</code> está bajo <b>POR REPUESTO</b>.
+    El cuadre Profit almacén 8 de estas semanas se cargó en <b>P.R.02 - CC</b>. No mezcles los dos.
+  </div>
+
+  <p>Flujo típico de un laptop (solo hojas):</p>
+  <div class="flow">
+    <div class="wh transito">En Transito - CC<small>pagado, viaja</small></div>
+    <div class="arrow">→</div>
+    <div class="wh ingresar">LAPTOPS CON DETALLE<small>triage / IMEI</small></div>
+    <div class="arrow">→</div>
+    <div class="wh disp">Disponibles Venta - CC<small>listo para FV</small></div>
+  </div>
+  <div class="flow">
+    <div class="wh disp">Disponibles Venta</div>
+    <div class="arrow">→</div>
+    <div class="wh pr">P.R.02 - CC<small>taller / falta pieza</small></div>
+    <div class="arrow">→</div>
+    <div class="wh cem">USO INTERNO / DAÑADAS<small>si ya no se vende</small></div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="sop" id="directo">
+  <div class="sop-head">
+    <span class="badge">03 · Pasos</span>
+    <h2>Traslado directo (el de todos los días)</h2>
+  </div>
+
+  <p>Úsalo cuando el equipo <b>ya está</b> en el almacén destino (o el movimiento es inmediato: del mostrador al taller, de P.R.02 a Disponible). Docs:
+  <a href="https://docs.frappe.io/erpnext/stock-entry">Stock Entry</a>.</p>
+
+  <div class="mock" aria-hidden="true">
+    <div class="mock-bar">Entrada de existencias / Nuevo <span>Validar</span></div>
+    <div class="mock-body">
+      <div class="mock-grid">
+        <div class="field"><label>Company *</label><div class="box">COMPUCLICK</div></div>
+        <div class="field"><label>Tipo de entrada de stock *</label><div class="box hi">Transferencia de material</div></div>
+        <div class="field"><label>Agregar al tránsito</label><div class="box">☐ (vacío = traslado directo)</div></div>
+        <div class="field"><label>Almacén por defecto</label><div class="box hi">clic ▶ para origen y destino hoja</div></div>
+      </div>
+      <table class="mock-table">
+        <thead><tr><th>Item</th><th>Origen</th><th>Destino</th><th>Qty</th><th>Serial</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>ITEM-00193 ThinkPad 11e</td>
+            <td>P.R.02 - CC</td>
+            <td>Disponibles Venta - CC</td>
+            <td>1</td>
+            <td>1s20LRS0…4485</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <ol class="pasos">
+    <li>
+      <span class="titulo">Almacén → Entradas de inventario → Nuevo</span>
+      Awesomebar: escribe <code>Stock Entry</code> o <code>Entrada de existencias</code>.
+    </li>
+    <li>
+      <span class="titulo">Company COMPUCLICK</span>
+      Si estás en BC/NC, el almacén <code>- CC</code> no va a cuadrar.
+    </li>
+    <li>
+      <span class="titulo">Tipo de entrada de stock: Transferencia de material</span>
+      No Stock de apertura, no Expedición, no Recepción, no Reempaque.
+      Deja <b>Agregar al tránsito</b> sin marcar si el movimiento es inmediato.
+    </li>
+    <li>
+      <span class="titulo">Almacén por defecto (clic en la flecha)</span>
+      Ahí pones origen y destino <b>hoja</b> de COMPUCLICK. Cada fila se rellena sola.
+      Si no los pones arriba, los eliges en la tabla de Productos (columna Almacén de origen / destino).
+    </li>
+    <li>
+      <span class="titulo">Fila: Item + cantidad</span>
+      El costo (tasa) lo trae el sistema. No lo cambies aquí: el traslado no retasa.
+    </li>
+    <li>
+      <span class="titulo">Guardar → Validar (Enviar)</span>
+      Observaciones: <code>Traslado P.R.02 → Disponible 16/11</code>.
+    </li>
+  </ol>
+
+  <figure class="foto">
+    <div class="foto-slot"><img src="fotos/3-1-cabecera-traslado.png" alt="Cabecera: Company COMPUCLICK, tipo Transferencia de material, Agregar al tránsito sin marcar"></div>
+    <figcaption>Foto 3.1 — Company COMPUCLICK · tipo Transferencia de material · Agregar al tránsito vacío = directo</figcaption>
+  </figure>
+  <figure class="foto">
+    <div class="foto-slot"><img src="fotos/3-2-tabla-items.png" alt="Desplegable Almacén de origen con hojas ACCESORIOS, ALMACEN 01, LAPTOPS CON DETALLE, P.R.01"></div>
+    <figcaption>Foto 3.2 — En cada fila: origen, destino, código, cantidad. El desplegable lista hojas, no carpetas.</figcaption>
+  </figure>
+</section>
+
+<!-- 04 -->
+<section class="sop" id="serial">
+  <div class="sop-head">
+    <span class="badge">04 · IMEI</span>
+    <h2>Si el artículo tiene serial</h2>
+  </div>
+
+  <p>La cantidad <b>es</b> el número de IMEI. Si mueves 2 laptops, qty 2 y <b>2 seriales</b> en el paquete. Los seriales del recuadro son los que <b>salen</b> del origen (no los que “quedan”, eso es reconciliación).</p>
+
+  <ol class="pasos">
+    <li>
+      <span class="titulo">En la fila, abre el paquete Serial / Lote</span>
+      O marca “Usar campos de número de serie” y pega un IMEI por línea.
+    </li>
+    <li>
+      <span class="titulo">Elige IMEI que ya están en el almacén origen</span>
+      Si el serial está en otro almacén, el sistema no lo deja. Mira primero <b>Número de serie</b> filtrado por Item + origen.
+    </li>
+    <li>
+      <span class="titulo">Qty de la fila = cuántos IMEI pegaste</span>
+      2 IMEI y qty 1 = error de bundle. 14 IMEI y el libro tiene 13 = no valides: hay cédula sucia (ese caso va a programador, no se arregla con traslado).
+    </li>
+  </ol>
+
+  <div class="tip">
+    <strong>FIFO (sin serial)</strong>
+    Solo pones qty. El sistema baja las capas del origen. Accesorios, recargas, etc.
+  </div>
+
+  <figure class="foto">
+    <div class="foto-slot"><img src="fotos/4-1-selector-seriales.png" alt="Ventana Agregar Números de serie: Item, almacén origen, Añadir fila, Agregar Números de serie"></div>
+    <figcaption>Foto 4.1 — Lápiz de la fila → Agregar números de serie. El Almacén debe ser el origen. Añadir fila, elegir IMEI, qty de la fila = cuántos IMEI.</figcaption>
+  </figure>
+  <div class="tip">
+    <strong>En la captura</strong>
+    Origen <code>LAPTOPS CON DETALLE - CC</code> → destino <code>USO INTERNO - CC</code>, ítem <code>ITEM-00477</code>.
+    Todavía qty 0 y sin IMEI: falta Añadir fila y Validar. Así se ve el selector antes de llenarlo.
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="sop" id="transito">
+  <div class="sop-head">
+    <span class="badge">05 · Viaje</span>
+    <h2>Cuando tarda en llegar (Add to Transit)</h2>
+  </div>
+
+  <p>Si el camión tarda y quieres que desaparezca del origen <b>hoy</b> pero <b>no</b> aparezca en destino hasta que confirmen: dos documentos. Docs:
+  <a href="https://docs.frappe.io/erpnext/how-to-manage-material-transfers-and-goods-in-transit">Goods in Transit</a>.</p>
+
+  <div class="flow">
+    <div class="wh disp">Disponible origen</div>
+    <div class="arrow">1</div>
+    <div class="wh transito">Almacén Tránsito</div>
+    <div class="arrow">2</div>
+    <div class="wh disp">Disponible destino</div>
+  </div>
+
+  <div class="vs">
+    <div class="si">
+      <h4>Documento 1 — Sale</h4>
+      Transferencia de material + casilla <b>Agregar al tránsito</b>.<br>
+      Origen = de dónde sale.<br>
+      Destino = almacén tipo <b>Transit</b>.<br>
+      Validar. Ya no está en origen.
+    </div>
+    <div class="si">
+      <h4>Documento 2 — Llega</h4>
+      Abrir el doc 1 → <b>End Transit</b><br>
+      o Nuevo traslado → Obtener de → Transit Stock Entry.<br>
+      Destino = almacén hoja real.<br>
+      Validar cuando el equipo esté en la mano.
+    </div>
+  </div>
+
+  <div class="check">
+    <strong>En Compuclick ya tienes la hoja <code>En Transito - CC</code></strong>
+    Para importación pagada que aún viaja, el stock a menudo <b>entra</b> ahí con la factura de compra (Update Stock). Eso no es “Agregar al tránsito”: es la compra.
+    El traslado viene después: <code>En Transito - CC</code> → <code>LAPTOPS CON DETALLE - CC</code> → <code>Disponibles Venta - CC</code>.
+  </div>
+
+  <figure>
+    <div class="foto-slot"><img src="fotos/3-1-cabecera-traslado.png" alt="Casilla Agregar al tránsito debajo del tipo Transferencia de material"></div>
+    <figcaption>Foto 5.1 — La casilla “Agregar al tránsito” está bajo el tipo. Vacía = traslado directo. Marcada = dos documentos (sale / llega).</figcaption>
+  </figure>
+</section>
+
+<!-- 06 -->
+<section class="sop" id="casos">
+  <div class="sop-head">
+    <span class="badge">06 · Casos</span>
+    <h2>Qué documento en cada situación</h2>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Qué pasó en la vida</th>
+        <th>Origen → destino</th>
+        <th>Documento</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Llegó el lote a Venezuela y se abre</td>
+        <td><code>En Transito - CC</code> → <code>LAPTOPS CON DETALLE - CC</code></td>
+        <td>Transferencia de material (pistolear IMEI si aún no tenían)</td>
+      </tr>
+      <tr>
+        <td>Pasó triage, listo para vender a sede</td>
+        <td><code>LAPTOPS CON DETALLE - CC</code> → <code>Disponibles Venta - CC</code></td>
+        <td>Transferencia de material</td>
+      </tr>
+      <tr>
+        <td>Se va a taller / espera pieza</td>
+        <td><code>Disponibles Venta - CC</code> → <code>P.R.02 - CC</code> o <code>POR FALTA DE REPUESTO - CC</code></td>
+        <td>Transferencia + IMEI. Elige <b>un</b> destino (son dos hojas distintas).</td>
+      </tr>
+      <tr>
+        <td>Uso interno / ya no se vende</td>
+        <td>→ <code>USO INTERNO - CC</code> o <code>DAÑADAS - CC</code></td>
+        <td>Transferencia (sigue en inventario; no es baja)</td>
+      </tr>
+      <tr>
+        <td>Salió de Profit, no existe al migrar</td>
+        <td>—</td>
+        <td><b>No traslado.</b> Reconciliación qty 0 o Expedición</td>
+      </tr>
+      <tr>
+        <td>Se lo lleva una sede Nuovocell</td>
+        <td>CC → sede NC</td>
+        <td><b>No traslado.</b> Factura de venta + intercompany</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 07 -->
+<section class="sop" id="check">
+  <div class="sop-head">
+    <span class="badge">07 · Cierre</span>
+    <h2>Cómo sé que quedó bien</h2>
+  </div>
+
+  <div class="check">
+    <strong>Después de Validar</strong>
+    1. En el documento: estado Enviado.<br>
+    2. <b>Stock Balance</b> del origen: bajó esa qty / esos IMEI.<br>
+    3. Stock Balance del destino: subió lo mismo. El valor total CC casi no cambia (solo se mueve).<br>
+    4. <b>Número de serie</b> de cada IMEI: almacén = destino.<br>
+    5. Mayor de inventario: una salida y una entrada el mismo voucher.
+  </div>
+
+  <h3>Errores típicos</h3>
+  <table>
+    <thead><tr><th>Qué ves</th><th>Por qué</th><th>Qué hacer</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>No aparece el almacén en el desplegable</td>
+        <td>Es grupo, o es de otra Company</td>
+        <td>Elige la hoja <code>… - CC</code>. Cambia Company arriba.</td>
+      </tr>
+      <tr>
+        <td>Insufficient stock / serial not in warehouse</td>
+        <td>El IMEI no está en el origen</td>
+        <td>Lista Serial No: mira en qué almacén está. Traslada desde ahí.</td>
+      </tr>
+      <tr>
+        <td>Bundle qty ≠ Actual qty (−14 vs −13)</td>
+        <td>Cédulas Active vs libro (caso ThinkPad 11e)</td>
+        <td>No fuerces el traslado. Ese ítem va a programador / Administrador.</td>
+      </tr>
+      <tr>
+        <td>El destino es un grupo</td>
+        <td><code>COMPUCLICK</code>, <code>LAPTOP - CC</code>, <code>POR REPARAR - CC</code>…</td>
+        <td>Usa la hoja: <code>LAPTOPS CON DETALLE - CC</code>, <code>P.R.02 - CC</code>, etc.</td>
+      </tr>
+      <tr>
+        <td>Cost Center - NC en un doc CC</td>
+        <td>Default del Item</td>
+        <td><code>Principal - CC</code> (o el de esa Company).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip">
+    <strong>Quién lo hace</strong>
+    Oscar / Andrea operan. Martin audita Stock Balance y seriales. María no interviene (no hay pago).
+  </div>
+</section>
+
+<footer>
+  SOP Traslados v1 · 16 nov 2026 · Carpeta <code>docs/capacitacion/sop/</code> ·
+  Ver en Chrome con <code>python -m http.server</code> (nunca file://) ·
+  Docs Frappe: stock-entry · stock-entry-purpose · goods-in-transit · warehouse.
+</footer>
+</div>
+
+<div id="lightbox" role="dialog" aria-label="Imagen ampliada" title="Clic o Esc para cerrar">
+  <img src="" alt="Vista ampliada">
+  <div class="lb-hint">Clic en cualquier parte o tecla Esc para cerrar</div>
+</div>
+<script>
+(function () {
+  var lb = document.getElementById("lightbox");
+  var lbImg = lb.querySelector("img");
+  function openLb(src, alt) {
+    lbImg.src = src;
+    lbImg.alt = alt || "Vista ampliada";
+    lb.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeLb() {
+    lb.classList.remove("open");
+    lbImg.removeAttribute("src");
+    document.body.style.overflow = "";
+  }
+  document.querySelectorAll(".foto-slot img").forEach(function (img) {
+    img.addEventListener("click", function (e) {
+      e.preventDefault();
+      openLb(img.currentSrc || img.src, img.alt);
+    });
+  });
+  lb.addEventListener("click", closeLb);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && lb.classList.contains("open")) closeLb();
+  });
+})();
+</script>
+</body>
+</html>

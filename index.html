@@ -1,13 +1,54 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=SOP_COMPRAS_OSCAR.html">
-  <title>Guía ERP Nuovocell</title>
-  <link rel="canonical" href="SOP_COMPRAS_OSCAR.html">
+  <title>Guías ERP Nuovocell</title>
+  <style>
+    :root { --galaxy:#081F5C; --planetary:#334EAC; --ok:#0f766e; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #f4f6fa; color: #1d2433;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    .page { max-width: 720px; margin: 0 auto; padding: 36px 20px 64px; }
+    header {
+      background: #fff; border-left: 6px solid var(--planetary);
+      padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 22px;
+    }
+    .brand { color: #7096D1; font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; font-weight: 600; }
+    h1 { margin: 6px 0 4px; color: var(--galaxy); font-size: 24px; }
+    .meta { color: #55607a; font-size: 13px; }
+    .cards { display: grid; gap: 14px; }
+    a.card {
+      display: block; text-decoration: none; color: inherit;
+      background: #fff; border: 1px solid #e2e8f2; border-radius: 12px;
+      padding: 18px 20px; border-top: 6px solid var(--planetary);
+    }
+    a.card.t { border-top-color: var(--ok); }
+    a.card h2 { margin: 0 0 6px; font-size: 18px; color: var(--galaxy); }
+    a.card p { margin: 0; font-size: 14px; color: #55607a; }
+    footer { margin-top: 24px; font-size: 12px; color: #55607a; }
+  </style>
 </head>
 <body>
-  <p>Guía ERP Nuovocell — <a href="SOP_COMPRAS_OSCAR.html">SOP Equipo de compras</a></p>
+  <div class="page">
+    <header>
+      <div class="brand">Nuovocell · Compuclick · Base Central</div>
+      <h1>Guías ERPNext</h1>
+      <p class="meta">Para el equipo · abrir en Google Chrome · <a href="https://erp.nuovocell.com.ve">erp.nuovocell.com.ve</a></p>
+    </header>
+    <div class="cards">
+      <a class="card" href="SOP_COMPRAS_OSCAR.html">
+        <h2>Compras y venta a sedes</h2>
+        <p>Factura de compra, artículos con serial, factura a Nuovocell, inventario e IMEI, devolución a proveedor.</p>
+      </a>
+      <a class="card t" href="SOP_TRASLADOS.html">
+        <h2>Traslados entre almacenes</h2>
+        <p>Mover mercancía de un almacén hoja a otro (P.R.02, Laptops con detalle, Disponibles Venta…). Con IMEI y fotos.</p>
+      </a>
+    </div>
+    <footer>Oscar / Andrea / Martin · no usar Microsoft Edge.</footer>
+  </div>
 </body>
 </html>
